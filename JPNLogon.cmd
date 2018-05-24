@@ -1,15 +1,13 @@
 REM IJPN System Logon Scripts Version 2
-REM Last Update: 17/05/2018 BY RASYID INFOMINA
+REM Last Update: 24/05/2018 BY RASYID INFOMINA
 REM ====================================================================
-REM   CHANGES 17/05/2018:
 REM   1. CHECK WINDOWS OS VERSION
 REM   2. DO AUTO SILIN FAIL FOR WINDOWS 7 WORKSTATION
-REM   3. CALL SALIN FAIL PROGRAM TO MANUALLY SALIN FAIL FOR WINDOWS 2000
+REM   3. CALL SALINFAIL.EXE PROGRAM TO MANUALLY SALIN FAIL FOR WINDOWS 2000
 REM ====================================================================
 
 NET TIME /DOMAIN:%USERDOMAIN% /SET /Y
-
-IF %PCID%==002 GOTO CLEANEND
+IF %PCID%==002 GOTO END
 
 REM TO CHECK VERSION MENU.INI ON BRANCH SERVER
 TYPE \\%USERDOMAIN%001\JPNAPPL\INI\MENU.INI | FIND "Version=" > D:\JPNAPPL\CFG\IJPNSVVER
@@ -32,20 +30,12 @@ CD \JPNAPPL\BINV6
 prgChkUsrIDStatus
 D:
 CD \JPNAPPL\MYKAD
-GOTO CLEANEND
+GOTO END
 
 :CHECKVERSION1
-REM Remove popup.vbs before recreate
-D:
-CD \JPNAPPL\CFG
-del /f D:\JPNAPPL\CFG\popup.vbs
-
-REM Create popup selesai salin fail. popup.vbs
-echo Dim obj,boxmsg > D:\JPNAPPL\CFG\popup.vbs
-echo Set obj = WScript.CreateObject ("WScript.shell") >> D:\JPNAPPL\CFG\popup.vbs
-echo boxmsg=msgbox("SALIN FAIL TELAH BERJAYA.. SILA LOGOFF DAN LOGIN SEMULA SISTEM. KLIK BUTANG [OK] UNTUK LOGOFF SISTEM.",64,"PERHATIAN") >> D:\JPNAPPL\CFG\popup.vbs
-echo obj.run "cmd /c prgLogOffSystem", 2 >> D:\JPNAPPL\CFG\popup.vbs
-echo Set obj = Nothing >> D:\JPNAPPL\CFG\popup.vbs
+REM Copy popup message program for end salin fail
+%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\CFG\popup.vbs   D:\JPNAPPL\CFG  /R/S/E/C/F/Y
+%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\BIN\CpyAppFiles.cmd D:\JPNAPPL\BIN  /R/S/E/C/F/Y
 
 REM TO CHECK IF WORKSATATION IS WINDOWS 2000 VERSION OR WINDOWS 7
 
@@ -62,65 +52,31 @@ GOTO WINSTATUS%ERRORLEVEL%
 
 :WINSTATUS0
 REM WINDOWS 2000 - POPUP TETINGKAP PEMBERITAHUAN SALIN FAIL SECARA MANUAL DAN MULAKAN PROGRAM SALINFAIL.EXE
+
+REM Copy Windows 2000 Salin Fail assets
+%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\BIN\CpyAppFilesETMSO300.cmd D:\JPNAPPL\BIN  /R/S/E/C/F/Y
+%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\BIN\CpyAppFilesETMT200.cmd D:\JPNAPPL\BIN  /R/S/E/C/F/Y
+%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\BIN\CpyAppFilesKBDBIO.cmd D:\JPNAPPL\BIN  /R/S/E/C/F/Y
+%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\BIN\CpyAppFilesMSO300.cmd D:\JPNAPPL\BIN  /R/S/E/C/F/Y
+%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\BIN\CpyAppFilesMT200.cmd D:\JPNAPPL\BIN  /R/S/E/C/F/Y
+
 CD \JPNAPPL\BIN
 START CMD /C "MODE 60,15 &TITLE PEMBERITAHUAN WINDOWS 2000 &COLOR 1E &ECHO.&ECHO.&ECHO.&ECHO.  Salin fail secara MANUAL perlu dilakukan &ECHO.  bagi workstation WINDOWS 2000. &ECHO.&ECHO.  Sila hubungi pihak HelpDesk untuk bantuan &ECHO.&ECHO.  atau; &ECHO.&ECHO.  Tekan butang [ENTER] untuk Salin Fail secara manual. &ECHO.&pause>NUL &START SALINFAIL.EXE"
-GOTO CLEANEND
+GOTO END
 
 :WINSTATUS1
 REM WINDOWS 7 - POPUP TETINGKAP PEMBERITAHUAN DAN SALIN FAIL AKAN DILAKUKAN
+START CMD /C "MODE 60,20 &TITLE SALIN FAIL SEDANG DILAKUKAN. SILA TUNGGU ... &COLOR 3E &ECHO.&ECHO. &CpyAppFiles.cmd"
+ECHO. delay start next line of program
+ECHO.
+ECHO.
+ECHO.
+ECHO.
+ECHO.
+ECHO.
 START CMD /C "MODE 50,10 &TITLE PEMBERITAHUAN &COLOR 1E &ECHO.&ECHO.&ECHO. Versi Sistem IJPN di Workstation ini tidak sama &ECHO. dengan Versi Sistem IJPN di Server. &ECHO. Salin fail sedang dilakukan.&ECHO.&ECHO. Sila tunggu sehingga selesai... &pause>NUL"
+GOTO END
 
-REM SET PARAMETER
-SET SERVERNAME=%USERDOMAIN%001
-
-D:
-taskkill /IM locksystem.exe
-
-ECHO Penyalinan Fail-fail BIN ...
-CD\JPNAPPL\BIN
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\BIN\*.*    D:\JPNAPPL\BIN  /R/S/E/C/F/Y
-
-ECHO Penyalinan Fail-fail BINV6...
-CD\JPNAPPL\BINV6
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\BINV6\*.*    D:\JPNAPPL\BINV6  /R/S/E/C/F/Y
-
-ECHO Penyalinan Fail-fail FIL ...
-CD\JPNAPPL\FIL
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\FIL\*.*    D:\JPNAPPL\FIL   /R/S/E/C/F/Y
-
-ECHO Penyalinan Fail-fail INI ...
-CD\JPNAPPL\INI
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\INI\*.*    D:\JPNAPPL\INI   /R/S/E/C/F/Y
-
-ECHO Penyalinan Fail-fail PRM ...
-CD\JPNAPPL\PRM
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\PRM\*.*    D:\JPNAPPL\PRM   /R/S/E/C/F/Y
-
-ECHO Penyalinan Fail-fail REF ...
-CD\JPNAPPL\REF
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\REF\*.*    D:\JPNAPPL\REF   /R/S/E/C/F/Y
-
-CALL CPYCADTYPE.CMD
-
-ECHO Penyalinan Fail-fail MYKAD ...
-CD\JPNAPPL\MYKAD
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\MYKADPATCH\MyKadPatch.exe   D:\JPNAPPL\MYKAD  /R/S/E/C/F/Y
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\MYKADPATCH\Version.ini      D:\JPNAPPL\MYKAD  /R/S/E/C/F/Y
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\MYKADPATCH\PatchMyKad.msi   D:\JPNAPPL\MYKAD  /R/S/E/C/F/Y
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\MYKADPATCH\VersionCheck.exe   D:\JPNAPPL\MYKAD  /R/S/E/C/F/Y
-
-ECHO Penyalinan Fail-fail OCX ...
-%SystemRoot%\system32\XCOPY  \\%SERVERNAME%\JPNAPPL\MYKADPATCH\vbalProgBar6.ocx    %SystemRoot%\system32  /R/S/E/C/F/Y
-
-CALL MYKADPATCH.EXE
-SET SERVERNAME=
-CD \JPNAPPL\BIN
-GOTO POPUPEND
-
-:CLEANEND
-EXIT
-
-:POPUPEND
-START D:\JPNAPPL\CFG\popup.vbs
+:END
 REM Exit bash script
 EXIT

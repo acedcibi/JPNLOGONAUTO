@@ -1,10 +1,10 @@
 REM IJPN System Logon Scripts Version 2
-REM Last Update: 24/05/2018 BY RASYID INFOMINA
-REM ====================================================================
+REM Last Update: 25/05/2018 BY RASYID INFOMINA
+REM =======================================================================
 REM   1. CHECK WINDOWS OS VERSION
 REM   2. DO AUTO SILIN FAIL FOR WINDOWS 7 WORKSTATION
 REM   3. CALL SALINFAIL.EXE PROGRAM TO MANUALLY SALIN FAIL FOR WINDOWS 2000
-REM ====================================================================
+REM =======================================================================
 
 NET TIME /DOMAIN:%USERDOMAIN% /SET /Y
 IF %PCID%==002 GOTO END
@@ -40,10 +40,10 @@ REM Copy popup message program for end salin fail
 REM TO CHECK IF WORKSATATION IS WINDOWS 2000 VERSION OR WINDOWS 7
 
 REM GET OS VERSION AND SAVE TO FILE
-VER > D:\JPNAPPL\CFG\OSVERSION.TXT
+VER > OSVERSION.TXT
 
 REM CHECK INSIDE FILE FOR ANY WORD OF 2000
-FINDSTR "2000" D:\JPNAPPL\CFG\OSVERSION.TXT > NUL: 2>&1
+FINDSTR "2000" OSVERSION.TXT > NUL: 2>&1
 
 REM IF ERRORLEVEL 0 THEN GOTO WINSTATUS0 = WINDOWS 2000
 REM IF ERRORLEVEL 1 THEN GOTO WINSTATUS1 = WINDOWS 7
@@ -61,7 +61,7 @@ REM Copy Windows 2000 Salin Fail assets
 %SystemRoot%\system32\XCOPY  \\%USERDOMAIN%001\JPNAPPL\BIN\CpyAppFilesMT200.cmd D:\JPNAPPL\BIN  /R/S/E/C/F/Y
 
 CD \JPNAPPL\BIN
-START CMD /C "MODE 60,15 &TITLE PEMBERITAHUAN WINDOWS 2000 &COLOR 1E &ECHO.&ECHO.&ECHO.&ECHO.  Salin fail secara MANUAL perlu dilakukan &ECHO.  bagi workstation WINDOWS 2000. &ECHO.&ECHO.  Sila hubungi pihak HelpDesk untuk bantuan &ECHO.&ECHO.  atau; &ECHO.&ECHO.  Tekan butang [ENTER] untuk Salin Fail secara manual. &ECHO.&pause>NUL &START SALINFAIL.EXE"
+START CMD /C "MODE 60,15 &TITLE PEMBERITAHUAN WINDOWS 2000 &COLOR 1E &ECHO.&ECHO.&ECHO.&ECHO.  Salin fail secara MANUAL perlu dilakukan &ECHO.  bagi workstation WINDOWS 2000. &ECHO.&ECHO.  Sila tekan [ENTER] untuk Salin Fail atau hubungi &ECHO.  pihak HelpDesk untuk bantuan... &ECHO.&ECHO.&pause>NUL &START SALINFAIL.EXE"
 GOTO END
 
 :WINSTATUS1

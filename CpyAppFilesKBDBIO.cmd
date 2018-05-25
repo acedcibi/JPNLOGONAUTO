@@ -1,6 +1,6 @@
 REM IJPN System Copy Files Script Version 2
 REM KEYBOARD CHERRY CBM1300 BIO DEVICE ONLY
-REM Last Update: 17/05/2018 BY RASYID INFOMINA
+REM Last Update: 25/05/2018 BY RASYID INFOMINA
 
 rem /R - overwrite read-only files
 rem /S - copy subdirectories
